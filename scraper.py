@@ -1,4 +1,11 @@
-# a small web scraper to scrape data
+# coding: utf-8;
+###############################################################################
+#
+# AUTHOR: Tim Schäfer
+# PYTHON: 3.7
+# DESCRIPTION:
+#
+###############################################################################
 
 import re
 from bs4 import *  # stands for Beautiful Soup version 4
@@ -8,7 +15,26 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
+from selenium.webdriver.chrome.options import Options
 
+chrome_options = Options()
+chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1')
+driver = webdriver.Chrome(chrome_options=chrome_options)
+driver.get('https://play.google.com/store/search?q=tower+defense&c=apps')
+
+
+while driver.find_element_by_id("show-more-button") is not None:
+    driver.find_element_by_id("show-more-button").click()
+    driver.implicitly_wait(10)
+
+print("cool")
+# Extract all links in the window of the searched category
+
+
+#driver.get("https://play.google.com/store/search?q=tower+defense&c=apps")
+
+
+"""
 market_url = 'x.html'
 google_url = 'https://play.google.com'
 
@@ -25,12 +51,17 @@ for div in mydivs:
     link_List.append(google_url+link)
 
 print(len(link_List))
+"""
+
+link_List = []
 
 game_url = link_List[0]
 final_Dic = {}
 
 for game_url in link_List:
 
+    # TODO why do we need selenium here???
+    # Maybe both options may be cool and seleneium only for a big overciew and bs4 for a quick one
     driver = webdriver.Chrome("C:\webdrivers\chromedriver.exe")
 
 
