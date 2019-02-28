@@ -17,7 +17,7 @@ from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions
 
 from selenium.webdriver.chrome.options import Options
-
+'''
 # Using a mobile browser to open the categories webpage to then read out the links for each app
 # Mobile browser is required cause the a normal browser loads content on scrolling and the mobile browser
 # loads content when clicking the "show more button". The while loop eventually clicks that button... if it doesn't
@@ -35,21 +35,12 @@ try:
 except selenium.common.exceptions.ElementNotVisibleException:
     pass
 
-#print(driver.page_source.encode("utf-8"))
-# Extract all links in the window of the searched category
-
-
-#driver.get("https://play.google.com/store/search?q=tower+defense&c=apps")
-
-
-# market_url = 'x.html'
-google_url = 'https://play.google.com'
-
-# get all important links
-soup = BeautifulSoup(driver.page_source.encode("utf-8"))
+# get all important links from the category page
+category_page_source_code = driver.page_source.encode("utf-8")
+soup = BeautifulSoup(category_page_source_code, "html.parser")
 mydivs = soup.findAll("div", {"class": "card no-rationale square-cover apps small"})
-
 link_List =  []
+google_url = 'https://play.google.com'
 for div in mydivs:
     m = re.search('class=\"card-click-target\" href=\"(.*)', str(div))
     s1 = m.group(1)
@@ -58,10 +49,19 @@ for div in mydivs:
     link_List.append(google_url+link)
 
 print(len(link_List))
-
-game_url = link_List[0]
+'''
 final_Dic = {}
+link_List = ["https://play.google.com/store/apps/details?id=com.SongGameDev.EleTD", "https://play.google.com/store/apps/details?id=com.melesta.toydefense3"]
 
+for game_url in link_List:
+    print(game_url)
+    content = urlopen(game_url).read()
+    soup = BeautifulSoup(content, "html.parser")
+
+    title = soup.findAll("h1", {"class": "AHFaub"})[0].findAll("span")
+    print(title[0].getText())
+
+'''
 for game_url in link_List:
 
     # TODO why do we need selenium here???
@@ -112,4 +112,4 @@ for game_url in link_List:
     driver.close()
 
 print(final_Dic)
-
+'''
