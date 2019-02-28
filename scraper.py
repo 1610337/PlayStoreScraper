@@ -14,32 +14,39 @@ import pandas as pd
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+import selenium.common.exceptions
 
 from selenium.webdriver.chrome.options import Options
 
+# Using a mobile browser to open the categories webpage to then read out the links for each app
+# Mobile browser is required cause the a normal browser loads content on scrolling and the mobile browser
+# loads content when clicking the "show more button". The while loop eventually clicks that button... if it doesn't
+# exist anymore then selenium raises an exception
 chrome_options = Options()
 chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1')
 driver = webdriver.Chrome(chrome_options=chrome_options)
 driver.get('https://play.google.com/store/search?q=tower+defense&c=apps')
 
+show_more_btn = driver.find_element_by_id("show-more-button")
+try:
+    while True:
+        driver.implicitly_wait(10)
+        show_more_btn.click()
+except selenium.common.exceptions.ElementNotVisibleException:
+    pass
 
-while driver.find_element_by_id("show-more-button") is not None:
-    driver.find_element_by_id("show-more-button").click()
-    driver.implicitly_wait(10)
-
-print("cool")
+#print(driver.page_source.encode("utf-8"))
 # Extract all links in the window of the searched category
 
 
 #driver.get("https://play.google.com/store/search?q=tower+defense&c=apps")
 
 
-"""
-market_url = 'x.html'
+# market_url = 'x.html'
 google_url = 'https://play.google.com'
 
 # get all important links
-soup = BeautifulSoup(open("x.html"))
+soup = BeautifulSoup(driver.page_source.encode("utf-8"))
 mydivs = soup.findAll("div", {"class": "card no-rationale square-cover apps small"})
 
 link_List =  []
@@ -51,9 +58,6 @@ for div in mydivs:
     link_List.append(google_url+link)
 
 print(len(link_List))
-"""
-
-link_List = []
 
 game_url = link_List[0]
 final_Dic = {}
