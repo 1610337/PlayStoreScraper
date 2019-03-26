@@ -61,6 +61,34 @@ for game_url in link_List:
     title = soup.findAll("h1", {"class": "AHFaub"})[0].findAll("span")
     print(title[0].getText())
 
+    rating = soup.findAll("div", {"class": "BHMmbe"})[0]
+    print(rating.getText())
+
+    price = soup.findAll("span", {"class": "oocvOe"})[0].findAll("button")
+    print(price[0].getText())
+
+    try:
+        elem = soup.findAll("div", {"class": "xyOfqd"})[0]
+        #elem = driver.find_element_by_class_name('xyOfqd')
+        data = str(elem.getText())
+
+        x = re.findall("Size*\d+", data)
+        print(x[0])
+
+        try:
+            print(data[data.index("Size"):data.index("Size")+5])
+            size = data[data.index("Size")+1]
+        except:
+            size = 'err'
+        try:
+            installationen = data[data.index("Installs")+1]
+        except:
+            installationen = 'err'
+    except:
+        size = 'err'
+        installationen = 'err'
+
+    print(size, installationen)
 '''
 for game_url in link_List:
 
