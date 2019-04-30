@@ -11,13 +11,15 @@ import re
 from bs4 import *  # stands for Beautiful Soup version 4
 from urllib.request import Request, urlopen
 import pandas as pd
+import sys
+from selenium.webdriver.common.by import By
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions
 
 from selenium.webdriver.chrome.options import Options
-'''
+
 # Using a mobile browser to open the categories webpage to then read out the links for each app
 # Mobile browser is required cause the a normal browser loads content on scrolling and the mobile browser
 # loads content when clicking the "show more button". The while loop eventually clicks that button... if it doesn't
@@ -25,9 +27,10 @@ from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1')
 driver = webdriver.Chrome(chrome_options=chrome_options)
-driver.get('https://play.google.com/store/search?q=tower+defense&c=apps')
-
-show_more_btn = driver.find_element_by_id("show-more-button")
+## driver.get('https://play.google.com/store/search?q=tower+defense&c=apps')
+'''
+#show_more_btn = driver.find_element_by_id("show-more-button")
+show_more_btn = driver.find_element(By.CLASS_NAME, "XjE2Pb")
 try:
     while True:
         driver.implicitly_wait(10)
@@ -54,90 +57,84 @@ final_Dic = {}
 link_List = ["https://play.google.com/store/apps/details?id=com.SongGameDev.EleTD", "https://play.google.com/store/apps/details?id=com.melesta.toydefense3"]
 
 for game_url in link_List:
-    print(game_url)
+
+    print("URL", game_url)
     content = urlopen(game_url).read()
     soup = BeautifulSoup(content, "html.parser")
 
     title = soup.findAll("h1", {"class": "AHFaub"})[0].findAll("span")
-    print(title[0].getText())
+    title = str(title[0].getText())
+    print("Title", title)  # WORKS!
 
     rating = soup.findAll("div", {"class": "BHMmbe"})[0]
-    print(rating.getText())
+    rating = rating.getText()
+    print("Rating", rating)  # WORKS!
 
     price = soup.findAll("span", {"class": "oocvOe"})[0].findAll("button")
-    print(price[0].getText())
+    if price == "Install":
+        price = str(price[0].getText())
+    else:
+        price = str(price[0].getText()).replace("€", "").replace(" Buy", "")
+
+    print("Price", price)  # saying price or the string "Install" # WORKS!
 
     try:
-        elem = soup.findAll("div", {"class": "xyOfqd"})[0]
-        #elem = driver.find_element_by_class_name('xyOfqd')
-        data = str(elem.getText())
+        # print(soup.get_text())
+        data = str(soup.get_text())
+    except:
+        pass  # everything else will mostly fail
 
-        x = re.findall("Size*\d+", data)
-        print(x[0])
-
-        try:
-            print(data[data.index("Size"):data.index("Size")+5])
-            size = data[data.index("Size")+1]
-        except:
-            size = 'err'
-        try:
-            installationen = data[data.index("Installs")+1]
-        except:
-            installationen = 'err'
+    try:
+        size = re.findall("Size*\d+MInstalls", data)[0].replace("Size", "").replace("Installs", "")  # WORKS!
+        print("Size", size)
     except:
         size = 'err'
-        installationen = 'err'
-
-    print(size, installationen)
-'''
-for game_url in link_List:
-
-    # TODO why do we need selenium here???
-    # Maybe both options may be cool and seleneium only for a big overciew and bs4 for a quick one
-    driver = webdriver.Chrome("C:\webdrivers\chromedriver.exe")
-
-
-    driver.get(game_url)
-    try:
-        elem = driver.find_element_by_class_name('AHFaub')
-        title = elem.text
-    except:
-        title = "err"
 
     try:
-        elem = driver.find_element_by_class_name('BHMmbe')
-        rating = elem.text
+        installs = re.search(r'Installs(.*?)\+Current', data).group(1)
+        print("No. Installations", installs)  # WORKS!
     except:
-        rating = "err"
+        installs = 'err'
 
     try:
-        elem = driver.find_element_by_class_name('oocvOe')
-        price =elem.text
+        no_of_ratings_raw = re.search(r'stars by (.*?) people', data).group(1)
+        print("No. Ratings", no_of_ratings_raw)
     except:
-        price = 'err'
+        no_of_ratings_raw = 'err'
 
     try:
-        elem = driver.find_element_by_class_name('xyOfqd')
-        data = str(elem.text).splitlines()
-        try:
-            size = data[data.index("Size")+1]
-        except:
-            size = 'err'
-        try:
-            installationen = data[data.index("Installs")+1]
-        except:
-            installationen = 'err'
+        updated = re.search(r'Updated(.*?)Size', data).group(1)
+        print("Updated", updated)
     except:
-        size = 'err'
-        installationen = 'err'
+        updated = 'err'
 
-    print(title, size, installationen, price, rating)
+    try:
+        android_version = re.search(r'Requires Android(.*?) and up', data).group(1)
+        print("Android", android_version)
+    except:
+        android_version = 'err'
 
-    final_Dic[title] = (installationen, price, rating, size)
-    df = pd.DataFrame.from_dict(final_Dic)
-    df.to_csv("googlePlayStoreInsights.csv")
+    try:
+        interactive_elements = re.search(r'Interactive Elements(.*?)PermissionsView', data).group(1)
+        print("interactive_elements", interactive_elements)
+    except:
+        interactive_elements = 'err'
 
-    driver.close()
+    try:
+        devs = soup.findAll("div", {"class": "BgcNfc"})
+        developer = "err"
+        for dev in devs:
+            if dev.getText() == "Developer":
+                main_tag = dev.parent.get_text
+                developer = re.search(r'href=(.*?)>Visit website', str(main_tag)).group(1)
+                developer = str(developer[1:len(developer)-1])
+                print("Developer", developer)
+    except:
+        developer = "err"
+
+    final_Dic[title] = (game_url, price, rating, size, installs, no_of_ratings_raw, updated, android_version, interactive_elements, developer)
 
 print(final_Dic)
-'''
+columns = ["game_url", "price", "rating", "size", "installs", "no_of_ratings_raw", "updated", "android_version", "interactive_elements", "developer"]
+df = pd.DataFrame.from_dict(final_Dic, orient='index', columns=columns)
+df.to_csv("googlePlayStoreInsights.csv")
