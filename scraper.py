@@ -27,34 +27,41 @@ from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 chrome_options.add_argument('--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) CriOS/56.0.2924.75 Mobile/14E5239e Safari/602.1')
 driver = webdriver.Chrome(chrome_options=chrome_options)
-## driver.get('https://play.google.com/store/search?q=tower+defense&c=apps')
+driver.get('C:\\Users\\Tim\\Documents\\University\\Facher\\WIA\\src\\y.html')
+
 '''
-#show_more_btn = driver.find_element_by_id("show-more-button")
-show_more_btn = driver.find_element(By.CLASS_NAME, "XjE2Pb")
+# show_more_btn = driver.find_element_by_id("show-more-button")
+#show_more_btn = driver.find_element(By.CLASS_NAME, "XjE2Pb")
 try:
     while True:
         driver.implicitly_wait(10)
         show_more_btn.click()
 except selenium.common.exceptions.ElementNotVisibleException:
     pass
-
+'''
 # get all important links from the category page
 category_page_source_code = driver.page_source.encode("utf-8")
 soup = BeautifulSoup(category_page_source_code, "html.parser")
-mydivs = soup.findAll("div", {"class": "card no-rationale square-cover apps small"})
-link_List =  []
+mydivs = soup.findAll("div", {"class": "wXUyZd"})
+link_List = []
 google_url = 'https://play.google.com'
-for div in mydivs:
+for div in mydivs[1:]:
     m = re.search('class=\"card-click-target\" href=\"(.*)', str(div))
-    s1 = m.group(1)
-    link = s1.split("\">")[0]
-    #  print(link)
-    link_List.append(google_url+link)
 
-print(len(link_List))
-'''
+    anchors = div.findAll("a")
+
+    link = str(anchors[0])
+    link = link.replace("<a aria-hidden=\"true\" class=\"poRVub\" href=\"", "").replace("\" tabindex=\"-1\"></a>", "")
+    print(link)
+    # s1 = m.group(1)
+    # link = s1.split("\">")[0]
+    #  print(link)
+    link_List.append(link)
+
+print(len(link_List), "links")
+
 final_Dic = {}
-link_List = ["https://play.google.com/store/apps/details?id=com.SongGameDev.EleTD", "https://play.google.com/store/apps/details?id=com.melesta.toydefense3"]
+##link_List = ["https://play.google.com/store/apps/details?id=com.SongGameDev.EleTD", "https://play.google.com/store/apps/details?id=com.melesta.toydefense3"]
 
 for game_url in link_List:
 
@@ -66,9 +73,13 @@ for game_url in link_List:
     title = str(title[0].getText())
     print("Title", title)  # WORKS!
 
-    rating = soup.findAll("div", {"class": "BHMmbe"})[0]
-    rating = rating.getText()
-    print("Rating", rating)  # WORKS!
+    try:
+        rating = soup.findAll("div", {"class": "BHMmbe"})[0]
+        rating = rating.getText()
+        print("Rating", rating)  # WORKS!
+    except:
+        rating = "none"
+        print("Rating", "none")  # WORKS!
 
     price = soup.findAll("span", {"class": "oocvOe"})[0].findAll("button")
     if price == "Install":
