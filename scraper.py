@@ -45,6 +45,8 @@ soup = BeautifulSoup(category_page_source_code, "html.parser")
 mydivs = soup.findAll("div", {"class": "wXUyZd"})
 link_List = []
 google_url = 'https://play.google.com'
+
+
 for div in mydivs[1:]:
     m = re.search('class=\"card-click-target\" href=\"(.*)', str(div))
 
@@ -60,8 +62,9 @@ for div in mydivs[1:]:
 
 print(len(link_List), "links")
 
+
 final_Dic = {}
-##link_List = ["https://play.google.com/store/apps/details?id=com.SongGameDev.EleTD", "https://play.google.com/store/apps/details?id=com.melesta.toydefense3"]
+#link_List = ["https://play.google.com/store/apps/details?id=com.SongGameDev.EleTD", "https://play.google.com/store/apps/details?id=com.melesta.toydefense3"]
 
 for game_url in link_List:
 
@@ -100,6 +103,14 @@ for game_url in link_List:
         print("Size", size)
     except:
         size = 'err'
+
+    ads = False
+    if "Contains Ads" in data:
+        ads = True
+    else:
+        ads = False
+
+    print("Ads", ads)
 
     try:
         installs = re.search(r'Installs(.*?)\+Current', data).group(1)
@@ -143,9 +154,9 @@ for game_url in link_List:
     except:
         developer = "err"
 
-    final_Dic[title] = (game_url, price, rating, size, installs, no_of_ratings_raw, updated, android_version, interactive_elements, developer)
+    final_Dic[title] = (game_url, price, rating, size, installs, no_of_ratings_raw, updated, android_version, interactive_elements, developer, ads)
 
 print(final_Dic)
-columns = ["game_url", "price", "rating", "size", "installs", "no_of_ratings_raw", "updated", "android_version", "interactive_elements", "developer"]
+columns = ["game_url", "price", "rating", "size", "installs", "no_of_ratings_raw", "updated", "android_version", "interactive_elements", "developer", "ads"]
 df = pd.DataFrame.from_dict(final_Dic, orient='index', columns=columns)
 df.to_csv("googlePlayStoreInsights.csv")
